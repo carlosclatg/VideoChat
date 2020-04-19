@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react';
 import openSocket from 'socket.io-client'
-import logo from './logo.svg';
 import './App.sass';
+import EntryForm from './components/EntryForm';
+import ChatForm from './components/ChatForm';
 
 
 class App extends React.Component {
@@ -11,12 +12,14 @@ class App extends React.Component {
   socket;
   timeOut;
   recognition;
+  isListenning;
 
 
   constructor(props){
     super(props)
     this.imageInput = document.getElementById("video1")
-    this.state = {messages: [], roomValue: '', nameValue: '', currentRoom: null, isLogged: false}
+    this.state = {messages: [], roomValue: undefined, nameValue: undefined, currentRoom: null, isLogged: false}
+    this.isListenning = false;
   }
 
 
@@ -36,12 +39,10 @@ class App extends React.Component {
     })
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    console.log(SpeechRecognition)
     if(SpeechRecognition){
       this.initializeSpeaker(SpeechRecognition);
     }
     const {nameValue, roomValue} = this.state
-    console.log(nameValue)
     this.setState({currentRoom: roomValue}, ()=> {})
     this.socket.emit('join', {nameValue, roomValue}, (error) => {
       if(error){ alert('Problem entering the room, may another user with the same name in the room....' + error)}
@@ -49,16 +50,15 @@ class App extends React.Component {
     })
   }
 
-
   initializeSpeaker(SpeechRecognition) {
     this.recognition = new SpeechRecognition();
     this.recognition.onstart = () => {
       console.log('voice activated');
     };
     this.recognition.onresult = (event) => {
-      console.log(event.results[0][0].transcript);
       if (event.results[0][0].transcript) {
         this.sendMessage(event.results[0][0].transcript);
+        this.isListenning = false;
       }
     }
   }
@@ -81,16 +81,26 @@ class App extends React.Component {
 
   handleShowVideo = event =>{
     event.preventDefault()
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    navigator.mediaDevices.getUserMedia({ video: { width: { min: 250, max: 250 }, height: { min: 250, max: 250 }}, audio: true })
         .then(stream => {
           document.getElementById("video1").srcObject = stream
           document.getElementById("video1").play()
         })
   }
 
+  handleHideVideo = event => {
+    event.preventDefault()
+    navigator.mediaDevices.getUserMedia({video: true, audio: true})
+      .then(stream=> {
+        document.getElementById("video1").srcObject = null
+        document.getElementById("video1").play()
+      })
+      clearInterval(this.timeOut)
+
+  }
+
   shareImage = event => {
     event.preventDefault()
-    console.log(this.socket)
     this.timeOut = setInterval(()=>{
       this.socket.emit('sendImage', this.getFrame())
     }, 1000/this.FPS)
@@ -102,8 +112,10 @@ class App extends React.Component {
   }
 
   hearVoice = (event) => {
-    if(this.recognition){
+    //disable button hear
+    if(this.recognition && !this.isListenning){
       event.preventDefault()
+      this.isListenning = true;
       this.recognition.start()
     }
   }
@@ -116,42 +128,39 @@ class App extends React.Component {
     const {isLogged, roomValue, nameValue, messages} = this.state
     return (
       <Fragment>
-    <div className="App columns">
-        {isLogged ?
-          <Fragment>
-            <img id="cameraFromOther"></img>
-            <button id="button1" onClick={this.handleShowVideo}>Show Video</button>
-            <button id="test" onClick={this.shareImage}>Share</button>
-            <button id="stop" onClick={this.stopImage}>Stop</button>
-            <video id="video1" width="640px" height="480px"></video>
-            <button id="voice" onClick={this.hearVoice}>Activate Voice Recognition</button>
-          </Fragment>
-          :
-          <Fragment>
-            <form className="column is-three-quarters-mobile is-two-thirds-tablet is-half-desktop is-one-third-widescreen is-one-third-fullhd"onSubmit={this.enterRoom}>
-              <div className="control">
-                <input type="number" value={roomValue} placeholder="roomId" onChange={this.handleChangeValue} required />
-              </div>
-              <div className="control">
-                <input type="text" value = {nameValue} placeholder="Name" onChange={this.handleChangeName} required></input>
-              </div>
-              <div className="control">
-                <button className="button is-link" type="submit" id="room">Join Room</button>
-              </div>
-              <p className="infoText">If the room exists, you will join to the room, otherwise a new will be created</p>
-            </form>
-          </Fragment>
-        }
-      </div>
-
-      <div>
-        {messages.map(text => {
-          return <p>{text}</p>
-        })}
-
-      </div>
+        <header className="header">
+          {roomValue && nameValue && isLogged ?
+            <nav class="navbar is-fixed-top is-primary">
+              <p className="infoText__black">You're connected as {nameValue} in room {roomValue}</p>
+            </nav>
+            :
+            <nav class="navbar is-fixed-top is-primary">
+            <p className="infoText__black">WELCOME TO CHAT-VIDEO-APP</p>
+            </nav>
+          }
+        </header>
+        <div className="App columns">
+          {isLogged ?
+            <Fragment>
+              <ChatForm 
+                handleHideVideo = {this.handleHideVideo}
+                handleShowVideo={this.handleShowVideo} 
+                shareImage={this.shareImage} 
+                stopImage={this.stopImage} 
+                hearVoice={this.hearVoice} 
+                messages={messages}>
+              </ChatForm>
+            </Fragment>
+            :
+            <Fragment>
+              <EntryForm nameValue={nameValue} roomValue= {roomValue} enterRoom={this.enterRoom} handleChangeName={this.handleChangeName} handleChangeValue={this.handleChangeValue}/>
+            </Fragment>
+          }
+        </div>
       </Fragment>
     )}
+
+  
 }
 
 export default App;
