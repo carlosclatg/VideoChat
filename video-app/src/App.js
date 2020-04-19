@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import openSocket from 'socket.io-client'
 import logo from './logo.svg';
-import './App.css';
+import './App.sass';
 
 
 class App extends React.Component {
@@ -16,7 +16,7 @@ class App extends React.Component {
   constructor(props){
     super(props)
     this.imageInput = document.getElementById("video1")
-    this.state = {messages: [], roomValue: '', nameValue: '', currentRoom: null}
+    this.state = {messages: [], roomValue: '', nameValue: '', currentRoom: null, isLogged: false}
   }
 
 
@@ -43,8 +43,12 @@ class App extends React.Component {
     const {nameValue, roomValue} = this.state
     console.log(nameValue)
     this.setState({currentRoom: roomValue}, ()=> {})
-    this.socket.emit('join', {nameValue, roomValue})
+    this.socket.emit('join', {nameValue, roomValue}, (error) => {
+      if(error){ alert('Problem entering the room, may another user with the same name in the room....' + error)}
+      else this.setState({isLogged: true}, ()=>{})
+    })
   }
+
 
   initializeSpeaker(SpeechRecognition) {
     this.recognition = new SpeechRecognition();
@@ -56,11 +60,7 @@ class App extends React.Component {
       if (event.results[0][0].transcript) {
         this.sendMessage(event.results[0][0].transcript);
       }
-    };
-  }
-
-  componentDidMount(){
-    
+    }
   }
 
   sendMessage = (text) => {
@@ -113,28 +113,44 @@ class App extends React.Component {
 
 
   render () {
+    const {isLogged, roomValue, nameValue, messages} = this.state
     return (
-    <div className="App">
-      <header className="App-header">
-        <img id="cameraFromOther"></img>
-        <button id="button1" onClick={this.handleShowVideo}>Show Video</button>
-        <button id="test" onClick={this.shareImage}>Share</button>
-        <button id="stop" onClick={this.stopImage}>Stop</button>
-        <video id="video1" width="640px" height="480px"></video>
-        <button id="voice" onClick={this.hearVoice}>Activate Voice Recognition</button>
-        <form onSubmit={this.enterRoom}>
-          <input type="text" value={this.state.roomValue} onChange={this.handleChangeValue} required></input>
-          <input type="text" value = {this.state.nameValue} onChange={this.handleChangeName} required></input>
-          <button type="submit" id="room">Room</button>
-        </form>
-      </header>
+      <Fragment>
+    <div className="App columns">
+        {isLogged ?
+          <Fragment>
+            <img id="cameraFromOther"></img>
+            <button id="button1" onClick={this.handleShowVideo}>Show Video</button>
+            <button id="test" onClick={this.shareImage}>Share</button>
+            <button id="stop" onClick={this.stopImage}>Stop</button>
+            <video id="video1" width="640px" height="480px"></video>
+            <button id="voice" onClick={this.hearVoice}>Activate Voice Recognition</button>
+          </Fragment>
+          :
+          <Fragment>
+            <form className="column is-three-quarters-mobile is-two-thirds-tablet is-half-desktop is-one-third-widescreen is-one-third-fullhd"onSubmit={this.enterRoom}>
+              <div className="control">
+                <input type="number" value={roomValue} placeholder="roomId" onChange={this.handleChangeValue} required />
+              </div>
+              <div className="control">
+                <input type="text" value = {nameValue} placeholder="Name" onChange={this.handleChangeName} required></input>
+              </div>
+              <div className="control">
+                <button className="button is-link" type="submit" id="room">Join Room</button>
+              </div>
+              <p className="infoText">If the room exists, you will join to the room, otherwise a new will be created</p>
+            </form>
+          </Fragment>
+        }
+      </div>
 
       <div>
-        {this.state.messages.map(text => {
+        {messages.map(text => {
           return <p>{text}</p>
         })}
+
       </div>
-    </div>
+      </Fragment>
     )}
 }
 

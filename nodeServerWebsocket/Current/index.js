@@ -1,4 +1,4 @@
-const users = []
+let users = []
 
 const addUser = user => {
     if(user.name && user.room){ //check values
@@ -16,11 +16,20 @@ const getRoomFromSocketId = (socketId) => {
     return user
 }
 
+const removeFromUsers = (socketId) => {
+    users = users.filter(u => u.id !== socketId)
+
+}
+
+const howManyUsers = () =>{
+    return users.length
+}
 
 
 
 
-module.exports = {addUser, getRoomFromSocketId}
+
+module.exports = {addUser, getRoomFromSocketId, removeFromUsers, howManyUsers}
 
 
 
