@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import openSocket from 'socket.io-client'
+import io from 'socket.io-client'
 import './App.sass';
 import EntryForm from './components/EntryForm';
 import ChatForm from './components/ChatForm';
@@ -18,7 +18,7 @@ class App extends React.Component {
   constructor(props){
     super(props)
     this.imageInput = document.getElementById("video1")
-    this.state = {messages: [], roomValue: undefined, nameValue: undefined, currentRoom: null, isLogged: false}
+    this.state = {messages: [], roomValue: undefined, nameValue: undefined, currentRoom: null, isLogged: false, error: undefined}
     this.isListenning = false;
   }
 
@@ -26,10 +26,16 @@ class App extends React.Component {
   enterRoom = (event) => {
     event.preventDefault()
     console.log('Entering room...')
-    this.socket = openSocket('http://192.168.0.168:9080');
+    this.socket = io('http://192.168.0.168:9080', {reconnection: false});
+
 
     this.socket.on('receiveImage', data => {
       document.getElementById('cameraFromOther').src = data;
+    })
+
+    this.socket.on('connect_error', (error) => {
+      alert('Server Error')
+      this.socket = null
     })
 
     this.socket.on('receiveText', data => {
@@ -81,7 +87,7 @@ class App extends React.Component {
 
   handleShowVideo = event =>{
     event.preventDefault()
-    navigator.mediaDevices.getUserMedia({ video: { width: { min: 250, max: 250 }, height: { min: 250, max: 250 }}, audio: true })
+    navigator.mediaDevices.getUserMedia({ video: { width: { min: 400, max: 400 }, height: { min: 400, max: 400 }}, audio: true })
         .then(stream => {
           document.getElementById("video1").srcObject = stream
           document.getElementById("video1").play()
@@ -125,17 +131,17 @@ class App extends React.Component {
 
 
   render () {
-    const {isLogged, roomValue, nameValue, messages} = this.state
+    const {isLogged, roomValue, nameValue, messages, error} = this.state
     return (
       <Fragment>
         <header className="header">
           {roomValue && nameValue && isLogged ?
-            <nav class="navbar is-fixed-top is-primary">
+            <nav className="navbar is-fixed-top is-primary">
               <p className="infoText__black">You're connected as {nameValue} in room {roomValue}</p>
             </nav>
             :
-            <nav class="navbar is-fixed-top is-primary">
-            <p className="infoText__black">WELCOME TO CHAT-VIDEO-APP</p>
+            <nav className="navbar is-fixed-top is-primary">
+              <p className="infoText__black">WELCOME TO CHAT-VIDEO-APP</p>
             </nav>
           }
         </header>
