@@ -3,7 +3,7 @@ This project is simply to have FUN!
 This project is about a video and chat web-application. 
 The communication may be done through keyboard or by voice recognition through microphone.
 
-![Alt Text]('./src/staticsources/video.gif')
+![Alt Text](./src/staticsources/video.gif)
 
 
 ## Architecture
