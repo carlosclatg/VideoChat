@@ -2,4 +2,4 @@
 
 #DOCUMENTATION
 
-[a link](https://github.com/carlosclatg/VideoChat/tree/master/video-app)
+[documentation](https://github.com/carlosclatg/VideoChat/tree/master/video-app)
