@@ -6,7 +6,7 @@ export default function Conversation({messages}){
         <Fragment>
             {messages && messages.length ?
                 messages.map(text => {
-                    return <Line text={text}></Line>
+                    return <Line message={text}></Line>
                 })
                 :
                 <p></p>

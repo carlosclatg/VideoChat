@@ -25,7 +25,6 @@ class App extends React.Component {
 
   enterRoom = (event) => {
     event.preventDefault()
-    console.log('Entering room...')
     this.socket = io('http://192.168.0.168:9080', {reconnection: false});
 
 
@@ -59,7 +58,6 @@ class App extends React.Component {
   initializeSpeaker(SpeechRecognition) {
     this.recognition = new SpeechRecognition();
     this.recognition.onstart = () => {
-      console.log('voice activated');
     };
     this.recognition.onresult = (event) => {
       if (event.results[0][0].transcript) {
@@ -70,6 +68,9 @@ class App extends React.Component {
   }
 
   sendMessage = (text) => {
+    const mess = this.state.messages
+    mess.push({text, user: 'you'})
+    this.setState({messages: mess}, ()=>{})
     this.socket.emit('sendText', text)
   }
 
@@ -154,7 +155,9 @@ class App extends React.Component {
                 shareImage={this.shareImage} 
                 stopImage={this.stopImage} 
                 hearVoice={this.hearVoice} 
-                messages={messages}>
+                messages={messages}
+                sendText={this.sendMessage}
+                >
               </ChatForm>
             </Fragment>
             :

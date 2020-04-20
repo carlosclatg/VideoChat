@@ -16,6 +16,12 @@ const getRoomFromSocketId = (socketId) => {
     return user
 }
 
+const getNameFromSocketId = (socketId) => {
+    const user = users.find(u => u.id == socketId)
+    if(user && user.name) return user.name
+    return user
+}
+
 const removeFromUsers = (socketId) => {
     users = users.filter(u => u.id !== socketId)
 
@@ -29,7 +35,7 @@ const howManyUsers = () =>{
 
 
 
-module.exports = {addUser, getRoomFromSocketId, removeFromUsers, howManyUsers}
+module.exports = {addUser, getRoomFromSocketId, removeFromUsers, howManyUsers, getNameFromSocketId}
 
 
 

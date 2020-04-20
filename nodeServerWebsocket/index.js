@@ -4,7 +4,7 @@ const http = require('http');
 const fs = require('fs')
 const app = express();
 const cors = require('cors')
-const {addUser, getRoomFromSocketId, removeFromUsers, howManyUsers} = require('./Current')
+const {addUser, getRoomFromSocketId, removeFromUsers, howManyUsers, getNameFromSocketId} = require('./Current')
 
 const User = require('./User')
 
@@ -31,13 +31,12 @@ const io = require('./socket').init(server);
 
 io.on('connection', socket => {
 
-    socket.on('sendImage', from => {
-        //socket.broadcast.emit('receiveImage', from)]
-        socket.broadcast.to(getRoomFromSocketId(socket.id)).emit('receiveImage', from)
+    socket.on('sendImage', image => {
+        socket.broadcast.to(getRoomFromSocketId(socket.id)).emit('receiveImage', image)
     });
 
-    socket.on('sendText', (from) => {
-        socket.broadcast.emit('receiveText', from)
+    socket.on('sendText', (text) => {
+        socket.broadcast.emit('receiveText', message={text, user: getNameFromSocketId(socket.id)})
     })
 
     socket.on('join', ({nameValue, roomValue}, callback) => {
@@ -52,7 +51,7 @@ io.on('connection', socket => {
     })
   
     socket.on('disconnect', () => {
-        console.log('Disconecting user ' + socket.id)
+        console.log('Disconecting user ' + socket.nameValue)
         removeFromUsers(socket.id)
         console.log('Number of users connected' + howManyUsers())
     });
