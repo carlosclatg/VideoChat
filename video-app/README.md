@@ -33,6 +33,6 @@ clone the project and simply run in the console inside the folder: nodemon index
 
 - Still not deployed, it works in localhost. Two cameras are not available! At this moment in case of having multiple (+2) cameras, only one image will be available, the last one to share!
 - No "serious" authentication is deployed, so in case you refresh webpage, you need to re-enter the room.
-- To be deployed and to use the chat, it is necessary to run it outside localhost, and in https. So the server needs to be in https and install autosigned certs. This is imposed by security in browser env.
-- Improve some styling and responsiveness
+- To be deployed and to use the camera and microphone, it is necessary to run it outside localhost, and in https. So the server needs to be in https and install autosigned certs. This is imposed by security in browser env.
+- Improve some styling and responsiveness, ie :knowing how many people are in the room.
 - Refactor some code and componetization
