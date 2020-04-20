@@ -28,6 +28,6 @@ clone the project and simply run in the console: nodemon index.js
 
 #### Limitations
 
-- Still not deployed, it works in localhost. Two cameras are not available!
+- Still not deployed, it works in localhost. Two cameras are not available! At this moment in case of having multiple (+2) cameras, only one image will be available, the last one to share!
 - To be deployed and to use the chat, it is necessary to run it outside localhost, and in https. So the server needs to be in https and install autosigned certs. This is imposed by security in browser env.
 - Improve some styling and responsiveness
