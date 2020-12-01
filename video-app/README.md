@@ -15,7 +15,7 @@ The architecture is a typical client-server application, where there may be mult
 ## Technologies
 
 Front: React,Sass and socket-io  
-Back: Nodejs (CSM) and socket-io
+Back: Nodejs (CMS) and socket-io
 
 ## Running the application
 
